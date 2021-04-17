@@ -1,0 +1,30 @@
+# Use root/example as user/password credentials
+version: '3.1'
+
+services:
+
+  api-server:
+    image: petrvich/php-with-pdo:7.4
+    restart: always
+    volumes:
+      - ./api:/var/www/localhost/htdocs
+      - ./service:/var/www/localhost/service
+      - ./vendor:/var/www/localhost/vendor
+      - ./dto:/var/www/localhost/dto
+    ports:
+      - 8181:80
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: example
+    volumes:
+      - ./init-db/:/docker-entrypoint-initdb.d/
+    ports:
+      - 3306:3306
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
