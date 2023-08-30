@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace petrvich\sendmail\service;
 
-use \PDO;
+use PDO;
 
 class ConnectionService
 {
@@ -30,8 +30,16 @@ class ConnectionService
         $this->port = $port;
     }
 
-    private function connect()
+    /**
+     * @throws \Exception
+     */
+    private function connect() : PDO
     {
+        error_log("username = " . $this->username);
+        error_log("pass = " . $this->pass);
+        error_log("servername = " . $this->servername);
+        error_log("port = " . $this->port);
+        error_log("dbname = " . $this->dbname);
         $dsn = "mysql:host=" . $this->servername . ";port=" . $this->port . ";dbname=" . $this->dbname;
         return new PDO($dsn, $this->username, $this->pass);
     }

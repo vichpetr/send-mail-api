@@ -1,23 +1,44 @@
 <?php
+require 'vendor/autoload.php'; // Assuming you have PHPMailer installed via Composer
 
-header('Access-Control-Allow-Headers: *');
-header('Access-Control-Allow-Origin: *');
-header('Content-Type: application/json, charset=utf-8');
+use Psr\Http\Message\ResponseInterface as Response;
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+use Slim\Factory\AppFactory;
 
-use petrvich\sendmail\dto\InputRequest;
-use petrvich\sendmail\service\SendMailApiService;
+$app = AppFactory::create();
 
-require_once '../service/autoload.php';
+// Define a simple array to store valid tokens
+$validTokens = [
+    'your-secret-token' // Replace with your secret token
+];
 
-$json = file_get_contents('php://input');
-$data = json_decode($json, true);
-if(!is_array($data)) {
-    $responseData = new \petrvich\sendmail\dto\ResponseData(false);
-    $responseData->setMessage("wrong data input");
-    echo json_encode($responseData);
-    exit;
-}
-$request = new InputRequest($data);
-$apiService = new SendMailApiService($request);
-$response = $apiService->executeEmailSend();
-echo json_encode($response);
+// Middleware to check the token
+$tokenMiddleware = function (Request $request, RequestHandler $handler, Response $response) use ($validTokens) {
+    $token = $request->getHeaderLine('Authorization');
+
+    if (!in_array($token, $validTokens)) {
+        $response->getBody()->write('{error: "Unauthorized"}');
+        $response->withStatus(401);
+        return $response;
+    }
+
+    return $handler->handle($request);
+};
+
+// Add the token middleware to the send-email endpoint
+$app->post('/send-email', function (Request $request, Response $response, $args) {
+    $requestBody = $request->getBody();
+    $responseBody = "{'request: $requestBody'}";
+    $response->getBody()->write($responseBody);
+    $response->withStatus(200);
+    return $response;
+})->add($tokenMiddleware);
+
+// Define a health check endpoint
+$app->get('/healthcheck', function (Request $request, Response $response, $args) {
+    $response->getBody()->write("status: OK}");
+    return $response;
+});
+
+$app->run();

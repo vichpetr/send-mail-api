@@ -6,7 +6,7 @@ SET foreign_key_checks = 0;
 SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
 DROP DATABASE IF EXISTS `send-email`;
-CREATE DATABASE `send-email`
+CREATE DATABASE `send-email`;
 USE `send-email`;
 
 create table sender
@@ -62,6 +62,15 @@ create table audit
     result tinyint(1) null,
     constraint audit_ibfk_1
         foreign key (template) references template (id)
+);
+
+create table users
+(
+    id int auto_increment
+        primary key,
+    user varchar(255) not null,
+    password varchar(255) not null,
+    isActive tinyint(1) default 1 null
 );
 
 create index template

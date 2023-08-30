@@ -12,6 +12,4 @@ require_once '../dto/Template.php';
 require_once 'ConnectionService.php';
 require_once 'DataService.php';
 require_once 'SendMailApiService.php';
-
-
-
+require_once 'AuthService.php';
